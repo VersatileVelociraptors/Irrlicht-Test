@@ -38,6 +38,11 @@ public:
 	}
 };
 
+// return color with pseudorandom RGB values
+irr::video::SColor randomColor(){
+	return irr::video::SColor(0, rand() % 255, rand() % 255, rand() % 255);
+}
+
 int main(int argc, char** argv){
 	EventReceiver receiver;
 	irr::IrrlichtDevice* device = irr::createDevice(irr::video::EDT_SOFTWARE,
@@ -53,13 +58,14 @@ int main(int argc, char** argv){
 	irr::gui::IGUIEnvironment* guienv = device->getGUIEnvironment();
 
 	// image assets
-	irr::video::ITexture* coco = driver->getTexture("cocoGuy.png");
-	irr::video::ITexture* logo = driver->getTexture("VersatileVelociraptors.png");
+	irr::video::ITexture* coco = driver->getTexture("assets/images/cocoGuy.png");
+	irr::video::ITexture* logo = driver->getTexture("assets/images/VersatileVelociraptors.png");
 
 	driver->getMaterial2D().TextureLayer[0].BilinearFilter = true;
 	driver->getMaterial2D().AntiAliasing = irr::video::EAAM_FULL_BASIC;
 
-	int coco_x = 0, coco_y = 0;
+	int coco_x = 0, coco_y = 0, ghetto_time = 0;
+	irr::video::SColor background(0, 255, 255, 255);
 
 	while (device->run()){
 		// move coco guy
@@ -75,13 +81,18 @@ int main(int argc, char** argv){
 		}
 
 		// render everything on screen
-		driver->beginScene(true, true, irr::video::SColor(0, 255, 255, 255));
+		if (ghetto_time >= 100) {
+			background = randomColor();
+			ghetto_time = 0;
+		}
+		driver->beginScene(true, true, background);
 		guienv->drawAll();
 		driver->draw2DImage(coco, irr::core::position2d<irr::s32>(coco_x, coco_y),
 			irr::core::rect<irr::s32>(0, 0, 100, 250), 0, irr::video::SColor(0, 255, 255, 255), true);
 		driver->draw2DImage(logo, irr::core::position2d<irr::s32>(receiver.getMouseX(), receiver.getMouseY()),
 			irr::core::rect<irr::s32>(0, 0, 700, 100), 0, irr::video::SColor(0, 255, 255, 255), true);
 		driver->endScene();
+		ghetto_time++;
 	}
 	device->drop();
 	return 0;
