@@ -45,8 +45,9 @@ irr::video::SColor randomColor(){
 
 int main(int argc, char** argv){
 	EventReceiver receiver;
+	irr::core::dimension2d<irr::u32> resolution = irr::core::dimension2d<irr::u32>(640 * 1.5, 360 * 1.5);
 	irr::IrrlichtDevice* device = irr::createDevice(irr::video::EDT_SOFTWARE,
-		irr::core::dimension2d<irr::u32>(640 * 1.5, 360 * 1.5), 16, false, false, false, &receiver);
+		resolution, 16, false, false, false, &receiver);
 
 	if (!device){
 		std::cerr << "No IrrlichtDevice" << std::endl;
@@ -64,27 +65,28 @@ int main(int argc, char** argv){
 	driver->getMaterial2D().TextureLayer[0].BilinearFilter = true;
 	driver->getMaterial2D().AntiAliasing = irr::video::EAAM_FULL_BASIC;
 
-	int coco_x = 0, coco_y = 0, ghetto_time = 0;
+	int coco_x = 0, coco_y = 0, color_update = 0;
 	irr::video::SColor background(0, 255, 255, 255);
 
 	while (device->run()){
 		// move coco guy
-		if (receiver.isKeyDown(irr::KEY_DOWN)) {
+		if (receiver.isKeyDown(irr::KEY_DOWN) && coco_y + coco->getSize().Height < resolution.Height) {
 			coco_y += 3;
-		} else if (receiver.isKeyDown(irr::KEY_UP)) {
+		} else if (receiver.isKeyDown(irr::KEY_UP) && coco_y > 0) {
 			coco_y -= 3;
 		}
-		if (receiver.isKeyDown(irr::KEY_RIGHT)) {
+		if (receiver.isKeyDown(irr::KEY_RIGHT) && coco_x + coco->getSize().Width < resolution.Width) {
 			coco_x += 3;
-		} else if (receiver.isKeyDown(irr::KEY_LEFT)) {
+		} else if (receiver.isKeyDown(irr::KEY_LEFT) && coco_x > 0) {
 			coco_x -= 3;
 		}
 
-		// render everything on screen
-		if (ghetto_time >= 100) {
+		if (device->getTimer()->getTime() - color_update >= 500) {
 			background = randomColor();
-			ghetto_time = 0;
+			color_update = device->getTimer()->getTime();
 		}
+
+		// render everything on screen
 		driver->beginScene(true, true, background);
 		guienv->drawAll();
 		driver->draw2DImage(coco, irr::core::position2d<irr::s32>(coco_x, coco_y),
@@ -92,7 +94,6 @@ int main(int argc, char** argv){
 		driver->draw2DImage(logo, irr::core::position2d<irr::s32>(receiver.getMouseX(), receiver.getMouseY()),
 			irr::core::rect<irr::s32>(0, 0, 700, 100), 0, irr::video::SColor(0, 255, 255, 255), true);
 		driver->endScene();
-		ghetto_time++;
 	}
 	device->drop();
 	return 0;
