@@ -39,8 +39,9 @@ public:
 };
 
 // return color with pseudorandom RGB values
-irr::video::SColor randomColor(){
-	return irr::video::SColor(0, rand() % 255, rand() % 255, rand() % 255);
+irr::video::SColor randomColor(irr::IRandomizer* randomizer){
+	return irr::video::SColor(0, (int) (randomizer->frand() * 255), (int) (randomizer->frand() * 255),
+			(int) (randomizer->frand() * 255));
 }
 
 int main(int argc, char** argv){
@@ -55,6 +56,8 @@ int main(int argc, char** argv){
 	}
 
 	device->setWindowCaption(L"Irrlicht-Test");
+	device->setResizable(false);
+
 	irr::video::IVideoDriver* driver = device->getVideoDriver();
 	irr::gui::IGUIEnvironment* guienv = device->getGUIEnvironment();
 
@@ -82,7 +85,7 @@ int main(int argc, char** argv){
 		}
 
 		if (device->getTimer()->getTime() - color_update >= 500) {
-			background = randomColor();
+			background = randomColor(device->getRandomizer());
 			color_update = device->getTimer()->getTime();
 		}
 
